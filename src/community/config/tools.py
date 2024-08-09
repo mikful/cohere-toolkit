@@ -9,6 +9,7 @@ from community.tools import (
     ManagedTool,
     PubMedRetriever,
     WolframAlpha,
+    LoanRefinanceCalculator
 )
 
 
@@ -19,6 +20,7 @@ class CommunityToolName(StrEnum):
     File_Upload_LlamaIndex = LlamaIndexUploadPDFRetriever.NAME
     Wolfram_Alpha = WolframAlpha.NAME
     ClinicalTrials = ClinicalTrials.NAME
+    LoanRefinanceCalculator = LoanRefinanceCalculator.NAME
 
 
 COMMUNITY_TOOLS = {
@@ -112,6 +114,23 @@ COMMUNITY_TOOLS = {
             },
         },
     ),
+    CommunityToolName.LoanRefinanceCalculator: ManagedTool(
+        display_name="Loan Refinance Calculator",
+        implementation=LoanRefinanceCalculator,
+        parameter_definitions={
+            "loan_data": {
+                "description": "A JSON string containing loan details including original_loan_amount, original_term, years_paid, original_interest_rate, refi_term, refi_interest_rate, closing_costs_percent, finance_closing_costs, and cash_out_amount.",
+                "type": "str",
+                "required": True,
+            }
+        },
+        is_visible=True,
+        is_available=LoanRefinanceCalculator.is_available(),
+        error_message="Loan Refinance Calculator tool not available.",
+        category=Category.Function,
+        description="This tool calculates loan refinancing options based on current loan details and refinancing parameters.",
+    ),
+    
 }
 
 # For main.py cli setup script
