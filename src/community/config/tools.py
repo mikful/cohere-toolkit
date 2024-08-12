@@ -114,23 +114,62 @@ COMMUNITY_TOOLS = {
             },
         },
     ),
-    CommunityToolName.LoanRefinanceCalculator: ManagedTool(
-        display_name="Loan Refinance Calculator",
-        implementation=LoanRefinanceCalculator,
-        parameter_definitions={
-            "loan_data": {
-                "description": "A JSON string containing loan details including original_loan_amount, original_term, years_paid, original_interest_rate, refi_term, refi_interest_rate, closing_costs_percent, finance_closing_costs, and cash_out_amount.",
-                "type": "str",
-                "required": True,
-            }
+CommunityToolName.LoanRefinanceCalculator: ManagedTool(
+    display_name="Loan Refinance Calculator",
+    implementation=LoanRefinanceCalculator,
+    parameter_definitions={
+        "original_loan_amount": {
+            "description": "The original amount of the loan in dollars.",
+            "type": "int",
+            "required": True,
         },
-        is_visible=True,
-        is_available=LoanRefinanceCalculator.is_available(),
-        error_message="Loan Refinance Calculator tool not available.",
-        category=Category.Function,
-        description="This tool calculates loan refinancing options based on current loan details and refinancing parameters.",
-    ),
-    
+        "original_term": {
+            "description": "The original term of the loan in years.",
+            "type": "int",
+            "required": True,
+        },
+        "years_paid": {
+            "description": "The number of years already paid on the original loan.",
+            "type": "int",
+            "required": True,
+        },
+        "original_interest_rate": {
+            "description": "The original interest rate of the loan as a percentage.",
+            "type": "float",
+            "required": True,
+        },
+        "refi_term": {
+            "description": "The term of the refinanced loan in years.",
+            "type": "int",
+            "required": True,
+        },
+        "refi_interest_rate": {
+            "description": "The interest rate of the refinanced loan as a percentage.",
+            "type": "float",
+            "required": True,
+        },
+        "closing_costs_percent": {
+            "description": "The closing costs as a percentage of the new loan amount.",
+            "type": "float",
+            "required": True,
+        },
+        "finance_closing_costs": {
+            "description": "Whether to finance the closing costs in the new loan amount.",
+            "type": "bool",
+            "required": True,
+        },
+        "cash_out_amount": {
+            "description": "The amount of cash to be taken out in the refinance, in dollars.",
+            "type": "int",
+            "required": True,
+        },
+    },
+    is_visible=True,
+    is_available=LoanRefinanceCalculator.is_available(),
+    error_message="Loan Refinance Calculator tool not available.",
+    category=Category.Function,
+    description="This tool calculates loan refinancing options based on current loan details and refinancing parameters. If the full parameters are not given you MUST ASK FOR THEM! Only ask for the parameters in the description.",
+),
 }
 
 # For main.py cli setup script
