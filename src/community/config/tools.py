@@ -168,7 +168,7 @@ CommunityToolName.LoanRefinanceCalculator: ManagedTool(
     is_available=LoanRefinanceCalculator.is_available(),
     error_message="Loan Refinance Calculator tool not available.",
     category=Category.Function,
-    description="This tool calculates loan refinancing options based on current loan details and refinancing parameters. If the full parameters are not given you MUST ASK FOR THEM! Only ask for the parameters in the description.",
+    description="This tool calculates loan refinancing options based on current loan details and refinancing parameters. If the full parameters are not given by the user you MUST ASK FOR THEM FIRST BEFORE Using! Only ask for the parameters in the description.",
 ),
 }
 

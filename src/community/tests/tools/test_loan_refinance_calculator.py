@@ -1,108 +1,111 @@
-# from community.tools import LoanRefinanceCalculator
-# import json
-# import pytest
+import pytest
+from community.tools import LoanRefinanceCalculator
 
-# @pytest.fixture
-# def calculator():
-#     return LoanRefinanceCalculator()
+def test_loan_refinance_calculator_basic():
+    calculator = LoanRefinanceCalculator()
+    loan_data = {
+        "original_loan_amount": 100000,
+        "original_term": 30,
+        "years_paid": 3,
+        "original_interest_rate": 6.5,
+        "refi_term": 30,
+        "refi_interest_rate": 3,
+        "closing_costs_percent": 3.5,
+        "finance_closing_costs": True,
+        "cash_out_amount": 0
+    }
+    
+    result = calculator.call(parameters=loan_data)
+    
+    assert "result" in result
+    assert isinstance(result["result"], dict)
+    assert "original_monthly_payment" in result["result"]
+    assert "refinanced_monthly_payment" in result["result"]
+    assert "remaining_interest_original" in result["result"]
+    assert "refinanced_total_interest" in result["result"]
+    
+    # Check if refinanced monthly payment is lower
+    assert result["result"]["refinanced_monthly_payment"] < result["result"]["original_monthly_payment"]
+    
+    # Check if refinanced total interest is lower
+    assert result["result"]["refinanced_total_interest"] < result["result"]["remaining_interest_original"]
 
-# def test_basic_refinance(calculator):
-#     # these are the default values on the website calculator to test against
-#     loan_data = {
-#         "original_loan_amount": 100000,
-#         "original_term": 30,
-#         "years_paid": 3,
-#         "original_interest_rate": 6.5,
-#         "refi_term": 30,
-#         "refi_interest_rate": 3,
-#         "closing_costs_percent": 3.5,
-#         "finance_closing_costs": "yes",
-#         "cash_out_amount": 0
-#     }
+def test_loan_refinance_calculator_cash_out():
+    calculator = LoanRefinanceCalculator()
+    loan_data = {
+        "original_loan_amount": 200000,
+        "original_term": 30,
+        "years_paid": 5,
+        "original_interest_rate": 4.5,
+        "refi_term": 25,
+        "refi_interest_rate": 3.75,
+        "closing_costs_percent": 2,
+        "finance_closing_costs": True,
+        "cash_out_amount": 20000
+    }
     
-#     result = calculator.calculate_from_json(json.dumps(loan_data))
+    result = calculator.call(parameters=loan_data)
     
-#     assert isinstance(result, dict)
-#     assert "original_monthly_payment" in result
-#     assert "refinanced_monthly_payment" in result
-#     assert "remaining_balance" in result
-#     assert "new_loan_amount" in result
-    
-#     assert result["original_monthly_payment"] > result["refinanced_monthly_payment"]
-#     assert result["new_loan_amount"] > result["remaining_balance"]
+    assert "result" in result
+    assert isinstance(result["result"], dict)
+    assert result["result"]["refinanced_total_payable"] > result["result"]["remaining_payable_original"]
 
-# def test_no_cashout_no_closing_costs(calculator):
-#     loan_data = {
-#         "original_loan_amount": 300000,
-#         "original_term": 30,
-#         "years_paid": 10,
-#         "original_interest_rate": 5.0,
-#         "refi_term": 20,
-#         "refi_interest_rate": 3.5,
-#         "closing_costs_percent": 1.5,
-#         "finance_closing_costs": "no",
-#         "cash_out_amount": 0
-#     }
+def test_loan_refinance_calculator_no_benefit():
+    calculator = LoanRefinanceCalculator()
+    loan_data = {
+        "original_loan_amount": 150000,
+        "original_term": 30,
+        "years_paid": 10,
+        "original_interest_rate": 3.5,
+        "refi_term": 20,
+        "refi_interest_rate": 4.0,
+        "closing_costs_percent": 3,
+        "finance_closing_costs": False,
+        "cash_out_amount": 0
+    }
     
-#     result = calculator.calculate_from_json(json.dumps(loan_data))
+    result = calculator.call(parameters=loan_data)
     
-#     assert isinstance(result, dict)
-#     assert result["new_loan_amount"] == pytest.approx(result["remaining_balance"], rel=1e-9)
+    assert "result" in result
+    assert isinstance(result["result"], dict)
+    assert result["result"]["refinanced_monthly_payment"] > result["result"]["original_monthly_payment"]
+    assert result["result"]["refinanced_total_interest"] > result["result"]["remaining_interest_original"]
 
-# def test_invalid_input(calculator):
-#     loan_data = {
-#         "original_loan_amount": "invalid",
-#         "original_term": 30,
-#         "years_paid": 5,
-#         "original_interest_rate": 4.5,
-#         "refi_term": 25,
-#         "refi_interest_rate": 3.75,
-#         "closing_costs_percent": 2,
-#         "finance_closing_costs": "yes",
-#         "cash_out_amount": 10000
-#     }
+def test_loan_refinance_calculator_invalid_input():
+    calculator = LoanRefinanceCalculator()
+    loan_data = {
+        "original_loan_amount": "invalid",
+        "original_term": 30,
+        "years_paid": 3,
+        "original_interest_rate": 6.5,
+        "refi_term": 30,
+        "refi_interest_rate": 3,
+        "closing_costs_percent": 3.5,
+        "finance_closing_costs": True,
+        "cash_out_amount": 0
+    }
     
-#     with pytest.raises(ValueError):
-#         calculator.calculate_from_json(json.dumps(loan_data))
+    result = calculator.call(parameters=loan_data)
+    
+    assert "text" in result
+    assert "Invalid value" in result["text"]
 
-# def test_edge_case_zero_values(calculator):
-#     loan_data = {
-#         "original_loan_amount": 0,
-#         "original_term": 0,
-#         "years_paid": 0,
-#         "original_interest_rate": 0,
-#         "refi_term": 0,
-#         "refi_interest_rate": 0,
-#         "closing_costs_percent": 0,
-#         "finance_closing_costs": "no",
-#         "cash_out_amount": 0
-#     }
+def test_loan_refinance_calculator_missing_parameter():
+    calculator = LoanRefinanceCalculator()
+    loan_data = {
+        "original_loan_amount": 100000,
+        "original_term": 30,
+        "years_paid": 3,
+        "original_interest_rate": 6.5,
+        "refi_term": 30,
+        "refi_interest_rate": 3,
+        "closing_costs_percent": 3.5,
+        "finance_closing_costs": True
+        # Missing cash_out_amount
+    }
     
-#     result = calculator.calculate_from_json(json.dumps(loan_data))
+    result = calculator.call(parameters=loan_data)
     
-#     assert isinstance(result, dict)
-#     assert result["original_monthly_payment"] == 0
-#     assert result["refinanced_monthly_payment"] == 0
-#     assert result["remaining_balance"] == 0
-#     assert result["new_loan_amount"] == 0
-
-# def test_large_values(calculator):
-#     loan_data = {
-#         "original_loan_amount": 10000000,
-#         "original_term": 30,
-#         "years_paid": 1,
-#         "original_interest_rate": 10,
-#         "refi_term": 29,
-#         "refi_interest_rate": 9.5,
-#         "closing_costs_percent": 5,
-#         "finance_closing_costs": "yes",
-#         "cash_out_amount": 1000000
-#     }
-    
-#     result = calculator.calculate_from_json(json.dumps(loan_data))
-    
-#     assert isinstance(result, dict)
-#     assert result["original_monthly_payment"] > 0
-#     assert result["refinanced_monthly_payment"] > 0
-#     assert result["remaining_balance"] > 0
-#     assert result["new_loan_amount"] > result["remaining_balance"]
+    assert "result" in result
+    assert isinstance(result["result"], dict)
+    # The call should succeed with a default value for cash_out_amount
